@@ -25,6 +25,7 @@ public class Client implements Closeable {
         return this.document;
     }
 
+    @Override
     public void close() throws IOException {
         this.restHighLevelClient.close();
     }
