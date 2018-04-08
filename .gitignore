@@ -1,0 +1,10 @@
+# Ignore rules
+
+## IDE
+.idea/
+*.iml
+
+## Java
+
+*.class
+target/
