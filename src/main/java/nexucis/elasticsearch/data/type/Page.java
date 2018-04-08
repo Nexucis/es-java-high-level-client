@@ -1,4 +1,4 @@
-package org.crunchytorch.elasticsearch.data.type;
+package nexucis.elasticsearch.data.type;
 
 import java.io.Serializable;
 import java.util.List;
