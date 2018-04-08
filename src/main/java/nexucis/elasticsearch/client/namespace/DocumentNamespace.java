@@ -17,8 +17,13 @@ public class DocumentNamespace extends AbstractNamespace {
 
     public <T> T get(String id, Class<T> clazz) throws IOException {
         Document document = this.getDocument(clazz);
-        GetRequest getRequest = new GetRequest(StringUtils.isNotEmpty(document.alias()) ? document.alias() : document.index(), document.type(), id);
+        String index = StringUtils.isNotEmpty(document.alias()) ? document.alias() : document.index();
+        GetRequest getRequest = new GetRequest(index, document.type(), id);
 
+        return this.get(getRequest, clazz);
+    }
+
+    public <T> T get(GetRequest getRequest, Class<T> clazz) throws IOException {
         GetResponse response = client.get(getRequest);
 
         T entity = JsonUtils.getObjectFromString(response.getSourceAsString(), clazz);
