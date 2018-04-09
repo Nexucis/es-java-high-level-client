@@ -27,7 +27,7 @@ public class DocumentNamespace extends AbstractNamespace {
         super(client);
     }
 
-    public <T> T get(String id, Class<T> clazz) throws IOException {
+    public <T> Optional<T> get(String id, Class<T> clazz) throws IOException {
         Document document = this.getDocument(clazz);
         String index = StringUtils.isNotEmpty(document.alias()) ? document.alias() : document.index();
         GetRequest getRequest = new GetRequest(index, document.type(), id);
@@ -35,12 +35,16 @@ public class DocumentNamespace extends AbstractNamespace {
         return this.get(getRequest, clazz);
     }
 
-    public <T> T get(GetRequest getRequest, Class<T> clazz) throws IOException {
+    public <T> Optional<T> get(GetRequest getRequest, Class<T> clazz) throws IOException {
         GetResponse response = client.get(getRequest);
+
+        if (!response.isExists()) {
+            return Optional.empty();
+        }
 
         T entity = JsonUtils.getObjectFromString(response.getSourceAsString(), clazz);
 
-        return entity;
+        return Optional.of(entity);
     }
 
     public <T> Optional<T> findOne(QueryBuilder queryBuilder, Class<T> clazz) throws IOException {
@@ -87,7 +91,7 @@ public class DocumentNamespace extends AbstractNamespace {
         }
 
         page.setTotalElement(totalElement)
-                .setTotalPage(totalElement/searchRequest.source().size())
+                .setTotalPage(totalElement / searchRequest.source().size())
                 .setHits(pageHits);
 
         return page;
