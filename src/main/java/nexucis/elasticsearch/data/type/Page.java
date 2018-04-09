@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Page<T> implements Serializable {
+
+    private static final long serialVersionUID = -2517507672159174317L;
+
     private long totalElement;
 
     private long totalPage;
