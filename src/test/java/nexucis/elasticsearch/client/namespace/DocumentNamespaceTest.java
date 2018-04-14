@@ -2,7 +2,6 @@ package nexucis.elasticsearch.client.namespace;
 
 import nexucis.elasticsearch.client.Client;
 import nexucis.elasticsearch.data.exception.IllegalEntityException;
-import nexucis.elasticsearch.data.exception.ShardException;
 import nexucis.elasticsearch.entity.EntityTest;
 import nexucis.elasticsearch.entity.EntityWithoutDocumentAnnotation;
 import nexucis.elasticsearch.entity.EntityWithoutIdAnnotation;
@@ -18,7 +17,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-public class DocumentNamespaceEntity {
+public class DocumentNamespaceTest {
 
     private Client client;
 
@@ -34,19 +33,19 @@ public class DocumentNamespaceEntity {
     }
 
     @Test(expected = IllegalEntityException.class)
-    public void testRequestWithEntityMissingDocumentAnnotation() throws IOException, ShardException {
+    public void testRequestWithEntityMissingDocumentAnnotation() throws IOException {
         EntityWithoutDocumentAnnotation entity = new EntityWithoutDocumentAnnotation();
         client.document().create(entity);
     }
 
     @Test(expected = IllegalEntityException.class)
-    public void testRequestWithEntityMissingIdAnnotation() throws IOException, ShardException {
+    public void testRequestWithEntityMissingIdAnnotation() throws IOException {
         EntityWithoutIdAnnotation entity = new EntityWithoutIdAnnotation();
         client.document().create(entity);
     }
 
     @Test
-    public void testCreateEntity() throws IOException, ShardException {
+    public void testCreateEntity() throws IOException {
         EntityTest entityTest = new EntityTest();
         entityTest.setAge("45");
         EntityTest entity = client.document().create(entityTest);
