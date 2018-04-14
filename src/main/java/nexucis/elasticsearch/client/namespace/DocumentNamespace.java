@@ -13,6 +13,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -32,39 +33,25 @@ public class DocumentNamespace extends AbstractNamespace {
         super(client);
     }
 
-    public <T> T create(T entity) throws IOException, ShardException {
+    public <T> T create(T entity) throws IOException {
         Document document = this.getDocument(entity.getClass());
 
-        String id = this.getId(entity.getClass());
+        String id = this.getId(entity);
         IndexRequest request;
 
         if (StringUtils.isEmpty(id)) {
             request = new IndexRequest(this.getIndex(document), document.type());
         } else {
             request = new IndexRequest(this.getIndex(document), document.type(), id);
+            // remove the Id in order to not create a value in elasticSearch
+            this.setId(null, entity.getClass());
         }
 
-        // remove the Id in order to not create a value in elasticSearch
-        this.setId(null, entity.getClass());
-
-        request.source(JsonUtils.getJsonFromObject(entity))
-                .create(true);
+        request.source(JsonUtils.getJsonFromObject(entity), XContentType.JSON);
 
         IndexResponse response = client.index(request);
 
-        ReplicationResponse.ShardInfo shardInfo = response.getShardInfo();
-        if (shardInfo.getTotal() != shardInfo.getSuccessful()) {
-            throw new ShardException("number of successful shards (" + shardInfo.getSuccessful() + ") is less than total shards (" + shardInfo.getTotal() + ")");
-        }
-        if (shardInfo.getFailed() > 0) {
-            StringJoiner builder = new StringJoiner(";");
-            for (ReplicationResponse.ShardInfo.Failure failure : shardInfo.getFailures()) {
-                builder.add(failure.reason());
-            }
-            throw new ShardException(builder.toString());
-        }
-
-        this.setId(response.getId(), entity.getClass());
+        this.setId(response.getId(), entity);
 
         return entity;
     }
@@ -83,7 +70,7 @@ public class DocumentNamespace extends AbstractNamespace {
         }
 
         T entity = JsonUtils.getObjectFromString(response.getSourceAsString(), clazz);
-        this.setId(response.getId(), entity.getClass());
+        this.setId(response.getId(), entity);
 
         return Optional.of(entity);
     }
@@ -131,7 +118,7 @@ public class DocumentNamespace extends AbstractNamespace {
 
         for (SearchHit hit : hits.getHits()) {
             T entity = JsonUtils.getObjectFromString(hit.getSourceAsString(), clazz);
-            this.setId(hit.getId(), entity.getClass());
+            this.setId(hit.getId(), entity);
             pageHits.add(entity);
         }
 
