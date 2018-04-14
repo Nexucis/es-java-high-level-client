@@ -40,7 +40,7 @@ jobs:
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
   test-back:
-    <<: *java_job_template_definition
+    <<: *java_job_with_es_template_definition
     steps:
       - checkout
       # Download and cache dependencies
