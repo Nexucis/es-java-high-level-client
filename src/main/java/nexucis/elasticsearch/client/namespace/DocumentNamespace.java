@@ -87,12 +87,15 @@ public class DocumentNamespace extends AbstractNamespace {
     }
 
     public <T> Page<T> find(QueryBuilder queryBuilder, int from, int size, Class<T> clazz) throws IOException {
+        Document document = this.getDocument(clazz);
         SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(queryBuilder)
                 .from(from)
                 .size(size);
-        searchRequest.source(searchSourceBuilder);
+        searchRequest.source(searchSourceBuilder)
+                .indices(this.getIndex(document))
+                .types(document.type());
 
         return this.find(searchRequest, clazz);
     }
