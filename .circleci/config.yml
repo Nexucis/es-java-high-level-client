@@ -1,0 +1,87 @@
+version: 2
+
+java_job_template: &java_job_template_definition
+  docker:
+    - image: circleci/openjdk:8-jdk
+  working_directory: ~/repo
+  environment:
+      # Customize the JVM maximum heap limit
+    JVM_OPTS: -Xmx3200m
+    TERM: dumb
+
+java_job_with_es_template: &java_job_with_es_template_definition
+  docker:
+    - image: circleci/openjdk:8-jdk
+    - image: docker.elastic.co/elasticsearch/elasticsearch:6.0.0
+  working_directory: ~/repo
+  environment:
+      # Customize the JVM maximum heap limit
+    JVM_OPTS: -Xmx3200m
+    TERM: dumb
+
+
+jobs:
+  build-back:
+    <<: *java_job_template_definition
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: mvn dependency:go-offline
+      - run: mvn compile
+      - save_cache: # saves the project dependencies
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
+  test-back:
+    <<: *java_job_template_definition
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: mvn integration-test
+      - save_cache: # saves the project dependencies
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+  analyze_eol:
+    docker:
+      - image: nexucis/ci-checkfiles
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: checkEOL *.java *.md *.xml *.properties *.sh
+
+  analyze_encoding_utf8:
+    docker:
+      - image: nexucis/ci-checkfiles
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: checkEncoding utf-8 *.java *.md *.xml *.properties *.sh
+
+workflows:
+  version: 2
+  build_and_analyze:
+    jobs:
+      - build-back
+      - test-back:
+          requires:
+            - build-back
+      - analyze_eol:
+          requires:
+            - test-back
+      - analyze_encoding_utf8:
+          requires:
+            - test-back
