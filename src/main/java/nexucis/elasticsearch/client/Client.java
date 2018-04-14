@@ -29,4 +29,8 @@ public class Client implements Closeable {
     public void close() throws IOException {
         this.restHighLevelClient.close();
     }
+
+    public RestHighLevelClient getRestHighLevelClient() {
+        return this.restHighLevelClient;
+    }
 }
