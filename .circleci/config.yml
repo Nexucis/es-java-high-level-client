@@ -50,11 +50,15 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
+      # see if the es cluster is available
+      - run: .circleci/wait_es_up.sh
+      # launch the test since es is available
       - run: mvn integration-test
       - save_cache: # saves the project dependencies
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
+
   analyze_eol:
     docker:
       - image: nexucis/ci-checkfiles
