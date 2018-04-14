@@ -48,4 +48,8 @@ public class AbstractNamespace {
 
         return document;
     }
+
+    protected String getIndex(Document document){
+        return  StringUtils.isNotEmpty(document.alias()) ? document.alias() : document.index();
+    }
 }
