@@ -35,11 +35,11 @@ public class AbstractNamespace {
         }
 
         if (StringUtils.isEmpty(document.alias()) || StringUtils.isEmpty(document.index())) {
-            throw new IllegalArgumentException("the given entity doesn't fill the alias or index field");
+            throw new IllegalEntityException("the given entity doesn't fill the alias or index field");
         }
 
         if (StringUtils.isEmpty(document.type())) {
-            throw new IllegalArgumentException("the given entity doesn't fill the type field");
+            throw new IllegalEntityException("the given entity doesn't fill the type field");
         }
 
         if (!AbstractNamespace.ANNOTATION_CACHE.containsKey(clazz)) {
