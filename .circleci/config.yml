@@ -108,6 +108,7 @@ workflows:
             - test-back
       - analyze_encoding_utf8:
           requires:
+            - test-back
       - analyze_sonarqube:
           requires:
             - test-back
