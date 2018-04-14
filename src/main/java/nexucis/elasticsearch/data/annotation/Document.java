@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Document {
-    String alias();
+    String alias() default "";
 
-    String index();
+    String index() default "";
 
     String type();
 }
