@@ -1,7 +1,6 @@
 package nexucis.elasticsearch.client.namespace;
 
 import nexucis.elasticsearch.data.annotation.Document;
-import nexucis.elasticsearch.data.exception.ShardException;
 import nexucis.elasticsearch.data.type.Page;
 import nexucis.elasticsearch.utils.JsonUtils;
 import nexucis.elasticsearch.utils.StringUtils;
@@ -11,7 +10,6 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -25,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringJoiner;
 
 public class DocumentNamespace extends AbstractNamespace {
 
