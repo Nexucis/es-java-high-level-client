@@ -75,6 +75,26 @@ jobs:
       - checkout
       - run: checkEncoding utf-8 *.java *.md *.xml *.properties *.sh
 
+  analyze_sonarqube:
+    <<: *java_job_with_es_template_definition
+    steps:
+      - checkout
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "pom.xml" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      # see if the es cluster is available
+      - run: .circleci/wait_es_up.sh
+      # launch the test since es is available
+      - run: mvn --batch-mode verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN -Dsonar.organization=nexucis-github -Dsonar.branch.name=${CIRCLE_BRANCH}
+      - save_cache: # saves the project dependencies
+          paths:
+            - ~/.m2
+          key: v1-dependencies-{{ checksum "pom.xml" }}
+
 workflows:
   version: 2
   build_and_analyze:
@@ -87,5 +107,7 @@ workflows:
           requires:
             - test-back
       - analyze_encoding_utf8:
+          requires:
+      - analyze_sonarqube:
           requires:
             - test-back
