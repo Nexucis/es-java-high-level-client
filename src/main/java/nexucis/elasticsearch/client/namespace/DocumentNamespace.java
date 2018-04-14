@@ -4,6 +4,7 @@ import nexucis.elasticsearch.data.annotation.Document;
 import nexucis.elasticsearch.data.exception.ShardException;
 import nexucis.elasticsearch.data.type.Page;
 import nexucis.elasticsearch.utils.JsonUtils;
+import nexucis.elasticsearch.utils.StringUtils;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -31,9 +32,21 @@ public class DocumentNamespace extends AbstractNamespace {
         super(client);
     }
 
-    public <T> T create(T entity, Class<T> clazz) throws IOException, ShardException {
-        Document document = this.getDocument(clazz);
-        IndexRequest request = new IndexRequest(this.getIndex(document), document.type());
+    public <T> T create(T entity) throws IOException, ShardException {
+        Document document = this.getDocument(entity.getClass());
+
+        String id = this.getId(entity.getClass());
+        IndexRequest request;
+
+        if (StringUtils.isEmpty(id)) {
+            request = new IndexRequest(this.getIndex(document), document.type());
+        } else {
+            request = new IndexRequest(this.getIndex(document), document.type(), id);
+        }
+
+        // remove the Id in order to not create a value in elasticSearch
+        this.setId(null, entity.getClass());
+
         request.source(JsonUtils.getJsonFromObject(entity))
                 .create(true);
 
@@ -50,6 +63,8 @@ public class DocumentNamespace extends AbstractNamespace {
             }
             throw new ShardException(builder.toString());
         }
+
+        this.setId(response.getId(), entity.getClass());
 
         return entity;
     }
@@ -68,6 +83,7 @@ public class DocumentNamespace extends AbstractNamespace {
         }
 
         T entity = JsonUtils.getObjectFromString(response.getSourceAsString(), clazz);
+        this.setId(response.getId(), entity.getClass());
 
         return Optional.of(entity);
     }
@@ -115,6 +131,7 @@ public class DocumentNamespace extends AbstractNamespace {
 
         for (SearchHit hit : hits.getHits()) {
             T entity = JsonUtils.getObjectFromString(hit.getSourceAsString(), clazz);
+            this.setId(hit.getId(), entity.getClass());
             pageHits.add(entity);
         }
 
