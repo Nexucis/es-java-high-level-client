@@ -28,8 +28,12 @@ public class DocumentNamespaceTest {
     }
 
     @After
-    public void after() throws IOException {
-        client.getRestHighLevelClient().indices().delete(new DeleteIndexRequest("_all"));
+    public void after() {
+        try {
+            client.getRestHighLevelClient().indices().delete(new DeleteIndexRequest("_all"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test(expected = IllegalEntityException.class)
