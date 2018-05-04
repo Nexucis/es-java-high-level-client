@@ -20,6 +20,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class DocumentNamespace extends AbstractNamespace {
         super(client);
     }
 
-    public <T> T create(T entity) throws IOException {
+    public <T extends Serializable> T create(T entity) throws IOException {
         Document document = this.getDocument(entity.getClass());
 
         String id = this.getId(entity);
@@ -53,13 +54,13 @@ public class DocumentNamespace extends AbstractNamespace {
         return entity;
     }
 
-    public <T> Optional<T> get(String id, Class<T> clazz) throws IOException {
+    public <T extends Serializable> Optional<T> get(String id, Class<T> clazz) throws IOException {
         Document document = this.getDocument(clazz);
         GetRequest getRequest = new GetRequest(this.getIndex(document), document.type(), id);
         return this.get(getRequest, clazz);
     }
 
-    public <T> Optional<T> get(GetRequest getRequest, Class<T> clazz) throws IOException {
+    public <T extends Serializable> Optional<T> get(GetRequest getRequest, Class<T> clazz) throws IOException {
         GetResponse response = client.get(getRequest);
 
         if (!response.isExists()) {
@@ -72,7 +73,7 @@ public class DocumentNamespace extends AbstractNamespace {
         return Optional.of(entity);
     }
 
-    public <T> Optional<T> findOne(QueryBuilder queryBuilder, Class<T> clazz) throws IOException {
+    public <T extends Serializable> Optional<T> findOne(QueryBuilder queryBuilder, Class<T> clazz) throws IOException {
         Page<T> page = this.find(queryBuilder, 0, 1, clazz);
 
         if (page.getHits().size() == 0) {
@@ -82,11 +83,11 @@ public class DocumentNamespace extends AbstractNamespace {
         return Optional.of(page.getHits().get(0));
     }
 
-    public <T> Page<T> findAll(int from, int size, Class<T> clazz) throws IOException {
+    public <T extends Serializable> Page<T> findAll(int from, int size, Class<T> clazz) throws IOException {
         return this.find(QueryBuilders.matchAllQuery(), from, size, clazz);
     }
 
-    public <T> Page<T> find(QueryBuilder queryBuilder, int from, int size, Class<T> clazz) throws IOException {
+    public <T extends Serializable> Page<T> find(QueryBuilder queryBuilder, int from, int size, Class<T> clazz) throws IOException {
         Document document = this.getDocument(clazz);
         SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -100,7 +101,7 @@ public class DocumentNamespace extends AbstractNamespace {
         return this.find(searchRequest, clazz);
     }
 
-    public <T> Page<T> find(SearchRequest searchRequest, Class<T> clazz) throws IOException {
+    public <T extends Serializable> Page<T> find(SearchRequest searchRequest, Class<T> clazz) throws IOException {
         SearchResponse searchResponse = client.search(searchRequest);
 
         Page<T> page = new Page<>();
