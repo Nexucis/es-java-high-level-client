@@ -6,7 +6,7 @@ import nexucis.elasticsearch.data.annotation.Id;
 import java.io.Serializable;
 
 @Document(index = "index-test", type = "type-test")
-public class EntityTest implements Serializable {
+public class EntityComplete implements Serializable {
 
     private static final long serialVersionUID = 5728619202845564904L;
 

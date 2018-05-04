@@ -2,7 +2,7 @@ package nexucis.elasticsearch.client.namespace;
 
 import nexucis.elasticsearch.client.Client;
 import nexucis.elasticsearch.data.exception.IllegalEntityException;
-import nexucis.elasticsearch.entity.EntityTest;
+import nexucis.elasticsearch.entity.EntityComplete;
 import nexucis.elasticsearch.entity.EntityWithoutDocumentAnnotation;
 import nexucis.elasticsearch.entity.EntityWithoutIdAnnotation;
 import nexucis.elasticsearch.utils.StringUtils;
@@ -46,9 +46,9 @@ public class DocumentNamespaceTest {
 
     @Test
     public void testCreateEntity() throws IOException {
-        EntityTest entityTest = new EntityTest();
+        EntityComplete entityTest = new EntityComplete();
         entityTest.setAge("45");
-        EntityTest entity = client.document().create(entityTest);
+        EntityComplete entity = client.document().create(entityTest);
 
         Assert.assertTrue(StringUtils.isNotEmpty(entity.getId()));
     }
