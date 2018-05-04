@@ -1,6 +1,7 @@
 package nexucis.elasticsearch.client;
 
 import nexucis.elasticsearch.client.namespace.DocumentNamespace;
+import nexucis.elasticsearch.client.namespace.IndicesNamespace;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import java.io.Closeable;
@@ -11,6 +12,8 @@ public class Client implements Closeable {
     private RestHighLevelClient restHighLevelClient;
 
     private DocumentNamespace document;
+
+    private IndicesNamespace indices;
 
     public Client(RestHighLevelClient restHighLevelClient) {
         this.restHighLevelClient = restHighLevelClient;
@@ -23,6 +26,14 @@ public class Client implements Closeable {
         }
 
         return this.document;
+    }
+
+    public IndicesNamespace indices() {
+        if (this.indices == null) {
+            this.indices = new IndicesNamespace(this.restHighLevelClient);
+        }
+
+        return this.indices;
     }
 
     @Override
