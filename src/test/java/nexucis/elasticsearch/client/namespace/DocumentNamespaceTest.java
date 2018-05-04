@@ -7,7 +7,6 @@ import nexucis.elasticsearch.entity.EntityWithoutDocumentAnnotation;
 import nexucis.elasticsearch.entity.EntityWithoutIdAnnotation;
 import nexucis.elasticsearch.utils.StringUtils;
 import org.apache.http.HttpHost;
-import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.junit.After;
@@ -28,12 +27,9 @@ public class DocumentNamespaceTest {
     }
 
     @After
-    public void after() {
-        try {
-            client.getRestHighLevelClient().indices().delete(new DeleteIndexRequest("_all"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void after() throws IOException {
+        client.indices().deleteAll();
+        client.close();
     }
 
     @Test(expected = IllegalEntityException.class)
