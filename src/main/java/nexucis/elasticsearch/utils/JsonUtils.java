@@ -9,6 +9,10 @@ public class JsonUtils {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    private JsonUtils(){
+
+    }
+
     public static <T> T getObjectFromString(String s, Class<T> clazz) throws IOException {
         return mapper.readValue(s, clazz);
     }
