@@ -76,7 +76,7 @@ public class DocumentNamespace extends AbstractNamespace {
     public <T extends Serializable> Optional<T> findOne(QueryBuilder queryBuilder, Class<T> clazz) throws IOException {
         Page<T> page = this.find(queryBuilder, 0, 1, clazz);
 
-        if (page.getHits().size() == 0) {
+        if (page.getHits().isEmpty()) {
             return Optional.empty();
         }
 
