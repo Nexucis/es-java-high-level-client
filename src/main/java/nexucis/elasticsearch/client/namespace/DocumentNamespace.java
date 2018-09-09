@@ -1,5 +1,6 @@
 package nexucis.elasticsearch.client.namespace;
 
+import nexucis.elasticsearch.data.annotation.AnnotationManager;
 import nexucis.elasticsearch.data.annotation.Document;
 import nexucis.elasticsearch.data.type.Page;
 import nexucis.elasticsearch.utils.JsonUtils;
@@ -24,38 +25,42 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class DocumentNamespace extends AbstractNamespace {
+public class DocumentNamespace {
 
-    public DocumentNamespace(RestHighLevelClient client) {
-        super(client);
+    private RestHighLevelClient client;
+    private AnnotationManager annotationManager;
+
+    public DocumentNamespace(RestHighLevelClient client, AnnotationManager annotationManager) {
+        this.client = client;
+        this.annotationManager = annotationManager;
     }
 
     public <T> T create(T entity) throws IOException {
-        Document document = this.getDocument(entity.getClass());
+        Document document = this.annotationManager.getDocument(entity.getClass());
 
-        String id = this.getId(entity);
+        String id = this.annotationManager.getId(entity);
         IndexRequest request;
 
         if (StringUtils.isEmpty(id)) {
-            request = new IndexRequest(this.getIndex(document), document.type());
+            request = new IndexRequest(this.annotationManager.getIndex(document), document.type());
         } else {
-            request = new IndexRequest(this.getIndex(document), document.type(), id);
+            request = new IndexRequest(this.annotationManager.getIndex(document), document.type(), id);
             // remove the Id in order to not create a value in elasticSearch
-            this.setId(null, entity.getClass());
+            this.annotationManager.setId(null, entity.getClass());
         }
 
         request.source(JsonUtils.getJsonFromObject(entity), XContentType.JSON);
 
         IndexResponse response = client.index(request);
 
-        this.setId(response.getId(), entity);
+        this.annotationManager.setId(response.getId(), entity);
 
         return entity;
     }
 
     public <T> Optional<T> get(String id, Class<T> clazz) throws IOException {
-        Document document = this.getDocument(clazz);
-        GetRequest getRequest = new GetRequest(this.getIndex(document), document.type(), id);
+        Document document = this.annotationManager.getDocument(clazz);
+        GetRequest getRequest = new GetRequest(this.annotationManager.getIndex(document), document.type(), id);
         return this.get(getRequest, clazz);
     }
 
@@ -67,7 +72,7 @@ public class DocumentNamespace extends AbstractNamespace {
         }
 
         T entity = JsonUtils.getObjectFromString(response.getSourceAsString(), clazz);
-        this.setId(response.getId(), entity);
+        this.annotationManager.setId(response.getId(), entity);
 
         return Optional.of(entity);
     }
@@ -87,14 +92,14 @@ public class DocumentNamespace extends AbstractNamespace {
     }
 
     public <T> Page<T> find(QueryBuilder queryBuilder, int from, int size, Class<T> clazz) throws IOException {
-        Document document = this.getDocument(clazz);
+        Document document = this.annotationManager.getDocument(clazz);
         SearchRequest searchRequest = new SearchRequest();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(queryBuilder)
                 .from(from)
                 .size(size);
         searchRequest.source(searchSourceBuilder)
-                .indices(this.getIndex(document))
+                .indices(this.annotationManager.getIndex(document))
                 .types(document.type());
 
         return this.find(searchRequest, clazz);
@@ -115,7 +120,7 @@ public class DocumentNamespace extends AbstractNamespace {
 
         for (SearchHit hit : hits.getHits()) {
             T entity = JsonUtils.getObjectFromString(hit.getSourceAsString(), clazz);
-            this.setId(hit.getId(), entity);
+            this.annotationManager.setId(hit.getId(), entity);
             pageHits.add(entity);
         }
 

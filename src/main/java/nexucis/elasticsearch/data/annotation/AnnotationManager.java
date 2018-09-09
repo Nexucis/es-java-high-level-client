@@ -1,10 +1,7 @@
-package nexucis.elasticsearch.client.namespace;
+package nexucis.elasticsearch.data.annotation;
 
-import nexucis.elasticsearch.data.annotation.Document;
-import nexucis.elasticsearch.data.annotation.Id;
 import nexucis.elasticsearch.data.exception.IllegalEntityException;
 import nexucis.elasticsearch.utils.StringUtils;
-import org.elasticsearch.client.RestHighLevelClient;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -13,21 +10,16 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AbstractNamespace {
+public class AnnotationManager {
 
-    private static final Map<Class<?>, Map<Class<? extends Annotation>, Object>> ANNOTATION_CACHE = new HashMap<>();
+    private final Map<Class<?>, Map<Class<? extends Annotation>, Object>> annotationCache = new HashMap<>();
 
-    protected RestHighLevelClient client;
 
-    public AbstractNamespace(RestHighLevelClient client) {
-        this.client = client;
-    }
+    public <T> Document getDocument(Class<T> clazz) {
 
-    protected <T> Document getDocument(Class<T> clazz) {
-
-        if (AbstractNamespace.ANNOTATION_CACHE.containsKey(clazz)
-                && AbstractNamespace.ANNOTATION_CACHE.get(clazz).containsKey(Document.class)) {
-            return (Document) AbstractNamespace.ANNOTATION_CACHE.get(clazz).get(Document.class);
+        if (this.annotationCache.containsKey(clazz)
+                && this.annotationCache.get(clazz).containsKey(Document.class)) {
+            return (Document) this.annotationCache.get(clazz).get(Document.class);
         }
 
         Document document = clazz.getAnnotation(Document.class);
@@ -44,20 +36,20 @@ public class AbstractNamespace {
             throw new IllegalEntityException("the given entity doesn't fill the type field");
         }
 
-        if (!AbstractNamespace.ANNOTATION_CACHE.containsKey(clazz)) {
-            AbstractNamespace.ANNOTATION_CACHE.put(clazz, new HashMap<>());
+        if (!this.annotationCache.containsKey(clazz)) {
+            this.annotationCache.put(clazz, new HashMap<>());
         }
 
-        AbstractNamespace.ANNOTATION_CACHE.get(clazz).put(Document.class, document);
+        this.annotationCache.get(clazz).put(Document.class, document);
 
         return document;
     }
 
-    protected String getIndex(Document document) {
+    public String getIndex(Document document) {
         return StringUtils.isNotEmpty(document.alias()) ? document.alias() : document.index();
     }
 
-    protected <T> void setId(String value, T entity) {
+    public <T> void setId(String value, T entity) {
         Field fieldId = this.getFieldID(entity.getClass());
 
         if (fieldId.isAccessible()) {
@@ -76,7 +68,7 @@ public class AbstractNamespace {
         }
     }
 
-    protected <T> String getId(T entity) {
+    public <T> String getId(T entity) {
         Field fieldId = this.getFieldID(entity.getClass());
 
         if (fieldId.isAccessible()) {
@@ -128,9 +120,9 @@ public class AbstractNamespace {
     }
 
     private <T> Field getFieldID(Class<T> clazz) {
-        if (AbstractNamespace.ANNOTATION_CACHE.containsKey(clazz)
-                && AbstractNamespace.ANNOTATION_CACHE.get(clazz).containsKey(Id.class)) {
-            return (Field) AbstractNamespace.ANNOTATION_CACHE.get(clazz).get(Id.class);
+        if (this.annotationCache.containsKey(clazz)
+                && this.annotationCache.get(clazz).containsKey(Id.class)) {
+            return (Field) this.annotationCache.get(clazz).get(Id.class);
         }
 
         Field[] fields = clazz.getDeclaredFields();
@@ -149,7 +141,7 @@ public class AbstractNamespace {
             throw new IllegalEntityException("the given entity doesn't have a field that carry the ID annotation");
         }
 
-        AbstractNamespace.ANNOTATION_CACHE.get(clazz).put(Id.class, fieldId);
+        this.annotationCache.get(clazz).put(Id.class, fieldId);
 
         return fieldId;
     }
