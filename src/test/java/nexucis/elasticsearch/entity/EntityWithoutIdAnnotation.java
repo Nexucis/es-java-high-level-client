@@ -4,7 +4,7 @@ import nexucis.elasticsearch.data.annotation.Document;
 
 import java.io.Serializable;
 
-@Document(index = "test_annotation", type = "test")
+@Document(alias = "test_annotation", type = "test")
 public class EntityWithoutIdAnnotation implements Serializable {
 
     private static final long serialVersionUID = 136183907810823313L;

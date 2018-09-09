@@ -10,7 +10,5 @@ import java.lang.annotation.Target;
 public @interface Document {
     String alias() default "";
 
-    String index() default "";
-
     String type();
 }

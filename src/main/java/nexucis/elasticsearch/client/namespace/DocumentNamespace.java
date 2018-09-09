@@ -42,9 +42,9 @@ public class DocumentNamespace {
         IndexRequest request;
 
         if (StringUtils.isEmpty(id)) {
-            request = new IndexRequest(this.annotationManager.getIndex(document), document.type());
+            request = new IndexRequest(this.annotationManager.getAlias(document), document.type());
         } else {
-            request = new IndexRequest(this.annotationManager.getIndex(document), document.type(), id);
+            request = new IndexRequest(this.annotationManager.getAlias(document), document.type(), id);
             // remove the Id in order to not create a value in elasticSearch
             this.annotationManager.setId(null, entity.getClass());
         }
@@ -60,7 +60,7 @@ public class DocumentNamespace {
 
     public <T> Optional<T> get(String id, Class<T> clazz) throws IOException {
         Document document = this.annotationManager.getDocument(clazz);
-        GetRequest getRequest = new GetRequest(this.annotationManager.getIndex(document), document.type(), id);
+        GetRequest getRequest = new GetRequest(this.annotationManager.getAlias(document), document.type(), id);
         return this.get(getRequest, clazz);
     }
 
@@ -99,7 +99,7 @@ public class DocumentNamespace {
                 .from(from)
                 .size(size);
         searchRequest.source(searchSourceBuilder)
-                .indices(this.annotationManager.getIndex(document))
+                .indices(this.annotationManager.getAlias(document))
                 .types(document.type());
 
         return this.find(searchRequest, clazz);

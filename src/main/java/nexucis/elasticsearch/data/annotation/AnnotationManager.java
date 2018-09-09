@@ -28,8 +28,8 @@ public class AnnotationManager {
             throw new IllegalEntityException("the given entity doesn't have the Document annotation");
         }
 
-        if (StringUtils.isEmpty(document.alias()) && StringUtils.isEmpty(document.index())) {
-            throw new IllegalEntityException("the given entity doesn't fill the alias or index field");
+        if (StringUtils.isEmpty(document.alias())) {
+            throw new IllegalEntityException("the given entity doesn't fill the alias in the Document annotation");
         }
 
         if (StringUtils.isEmpty(document.type())) {
@@ -45,8 +45,8 @@ public class AnnotationManager {
         return document;
     }
 
-    public String getIndex(Document document) {
-        return StringUtils.isNotEmpty(document.alias()) ? document.alias() : document.index();
+    public String getAlias(Document document) {
+        return document.alias();
     }
 
     public <T> void setId(String value, T entity) {
@@ -139,6 +139,10 @@ public class AnnotationManager {
 
         if (fieldId == null) {
             throw new IllegalEntityException("the given entity doesn't have a field that carry the ID annotation");
+        }
+
+        if (!this.annotationCache.containsKey(clazz)) {
+            this.annotationCache.put(clazz, new HashMap<>());
         }
 
         this.annotationCache.get(clazz).put(Id.class, fieldId);

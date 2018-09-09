@@ -1,6 +1,7 @@
 package nexucis.elasticsearch.client;
 
 import nexucis.elasticsearch.client.namespace.DocumentNamespace;
+import nexucis.elasticsearch.client.namespace.IndexNamespace;
 import nexucis.elasticsearch.data.annotation.AnnotationManager;
 import org.elasticsearch.client.RestHighLevelClient;
 
@@ -12,6 +13,8 @@ public class Client implements Closeable {
     private RestHighLevelClient restHighLevelClient;
 
     private DocumentNamespace document;
+
+    private IndexNamespace index;
 
     private AnnotationManager annotationManager;
 
@@ -27,6 +30,13 @@ public class Client implements Closeable {
         }
 
         return this.document;
+    }
+
+    public IndexNamespace index() {
+        if (this.index == null) {
+            this.index = new IndexNamespace(this.restHighLevelClient, this.annotationManager);
+        }
+        return this.index;
     }
 
     @Override
